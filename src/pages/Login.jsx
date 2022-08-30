@@ -1,5 +1,13 @@
+import { useForm } from "react-hook-form";
+import { useMutation } from "react-query";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import {mobile} from "../responsive";
+import { mobile } from "../responsive";
+import { _service } from "../Service/api_service";
+import { ToastContainer, toast } from "react-toastify";
+
+import "react-toastify/dist/ReactToastify.css";
+import { showNotification } from "../components/Notification";
 
 const Container = styled.div`
   width: 100vw;
@@ -58,13 +66,27 @@ const Link = styled.a`
 `;
 
 const Login = () => {
+  const navigate = useNavigate();
+  const { mutate } = useMutation((data) => _service.postLogin(data), {
+    onSuccess: (res, data) => {
+      localStorage.setItem("token", res?.data?.token);
+      navigate("/");
+    },
+    onError: (err) => showNotification("Eroor in login"),
+  });
+  const { register, handleSubmit } = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
   return (
     <Container>
       <Wrapper>
         <Title>SIGN IN</Title>
-        <Form>
-          <Input placeholder="username" />
-          <Input placeholder="password" />
+        <Form onSubmit={handleSubmit((data, e) => mutate(data))}>
+          <Input {...register("email")} placeholder="Email" />
+          <Input {...register("password")} placeholder="password" />
           <Button>LOGIN</Button>
           <Link>DO NOT YOU REMEMBER THE PASSWORD?</Link>
           <Link>CREATE A NEW ACCOUNT</Link>

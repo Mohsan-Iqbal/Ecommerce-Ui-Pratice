@@ -1,17 +1,20 @@
 import { Add, Remove } from "@material-ui/icons";
+import { useQuery } from "react-query";
+import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import Announcement from "../components/Announcement";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import Newsletter from "../components/Newsletter";
 import { mobile } from "../responsive";
+import { _service } from "../Service/api_service";
 
 const Container = styled.div``;
 
 const Wrapper = styled.div`
   padding: 50px;
   display: flex;
-  ${mobile({ padding: "10px", flexDirection:"column" })}
+  ${mobile({ padding: "10px", flexDirection: "column" })}
 `;
 
 const ImgContainer = styled.div`
@@ -110,45 +113,46 @@ const Button = styled.button`
   cursor: pointer;
   font-weight: 500;
 
-  &:hover{
-      background-color: #f8f4f4;
+  &:hover {
+    background-color: #f8f4f4;
   }
 `;
 
-const Product = () => {
+const ProductDetail = () => {
+  const { id } = useParams();
+  const { data: product, isLoading } = useQuery("getProductById", () =>
+    _service.getProductById(id)
+  );
+  if (isLoading) {
+    return <h2>Loading..............</h2>;
+  }
   return (
     <Container>
       <Navbar />
       <Announcement />
       <Wrapper>
         <ImgContainer>
-          <Image src="https://i.ibb.co/S6qMxwr/jean.jpg" />
+          <Image src={product?.data?.img} />
         </ImgContainer>
         <InfoContainer>
-          <Title>Denim Jumpsuit</Title>
-          <Desc>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec
-            venenatis, dolor in finibus malesuada, lectus ipsum porta nunc, at
-            iaculis arcu nisi sed mauris. Nulla fermentum vestibulum ex, eget
-            tristique tortor pretium ut. Curabitur elit justo, consequat id
-            condimentum ac, volutpat ornare.
-          </Desc>
-          <Price>$ 20</Price>
+          <Title>{product?.data?.title}</Title>
+          <Desc>{product?.data?.desc}</Desc>
+          <Price>{product?.data?.price}</Price>
           <FilterContainer>
             <Filter>
               <FilterTitle>Color</FilterTitle>
-              <FilterColor color="black" />
-              <FilterColor color="darkblue" />
-              <FilterColor color="gray" />
+              {product?.data?.color.map((item, i) => (
+                <FilterColor color={item} key={i} />
+              ))}
             </Filter>
             <Filter>
               <FilterTitle>Size</FilterTitle>
               <FilterSize>
-                <FilterSizeOption>XS</FilterSizeOption>
-                <FilterSizeOption>S</FilterSizeOption>
-                <FilterSizeOption>M</FilterSizeOption>
-                <FilterSizeOption>L</FilterSizeOption>
-                <FilterSizeOption>XL</FilterSizeOption>
+                {product?.data?.size.map((item, i) => (
+                  <FilterSizeOption key={i}>
+                    {item.toUpperCase()}
+                  </FilterSizeOption>
+                ))}
               </FilterSize>
             </Filter>
           </FilterContainer>
@@ -168,4 +172,4 @@ const Product = () => {
   );
 };
 
-export default Product;
+export default ProductDetail;

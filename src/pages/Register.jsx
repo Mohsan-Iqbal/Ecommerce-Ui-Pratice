@@ -1,5 +1,9 @@
+import { useMutation } from "react-query";
 import styled from "styled-components";
 import { mobile } from "../responsive";
+import { _service } from "../Service/api_service";
+import { memo } from "react";
+import { useForm } from "react-hook-form";
 
 const Container = styled.div`
   width: 100vw;
@@ -54,27 +58,47 @@ const Button = styled.button`
   cursor: pointer;
 `;
 
+var count = 0;
 const Register = () => {
+  const { register, handleSubmit } = useForm({
+    defaultValues: {
+      first_name: "",
+      last_name: "",
+      email: "",
+      password: "",
+      phone: "",
+      confirm_password: "",
+    },
+  });
+
+  const { mutate } = useMutation((data) => _service.createUser(data), {
+    onSuccess: (res, data) => console.log("User created successfully"),
+    onError: (err) => console.log({ err }),
+  });
+  console.log("component renders", count++);
   return (
     <Container>
       <Wrapper>
         <Title>CREATE AN ACCOUNT</Title>
-        <Form>
-          <Input placeholder="name" />
-          <Input placeholder="last name" />
-          <Input placeholder="username" />
-          <Input placeholder="email" />
-          <Input placeholder="password" />
-          <Input placeholder="confirm password" />
+        <Form onSubmit={handleSubmit((data, e) => mutate(data))}>
+          <Input {...register("first_name")} placeholder="first name" />
+          <Input {...register("last_name")} placeholder="last name" />
+          <Input {...register("email")} placeholder="email" />
+          <Input {...register("phone")} placeholder="Phone" />
+          <Input {...register("password")} placeholder="password" />
+          <Input
+            {...register("confirm_password")}
+            placeholder="confirm password"
+          />
           <Agreement>
             By creating an account, I consent to the processing of my personal
             data in accordance with the <b>PRIVACY POLICY</b>
           </Agreement>
-          <Button>CREATE</Button>
+          <Button type="submit">CREATE</Button>
         </Form>
       </Wrapper>
     </Container>
   );
 };
 
-export default Register;
+export default memo(Register);
